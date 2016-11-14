@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Exercice01
 {
-    class GameObjectAnime
+    class GameObjectAnimeEnemy
     {
         public Rectangle position;
         public int vitesse;
@@ -17,30 +17,28 @@ namespace Exercice01
         public Vector2 direction;
         public Rectangle spriteAffiche;
 
+        private int secondeDebut = 0;
+        private int secondeAttente = 5;
+        private Random rnd = new Random();
+
         public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite };
         public Etat etat;
         private int compteur = 0;
 
-        // Gestion des tableaux de sprites (chaque sprite est un rectangle dans le tableau)
-
         // Marche
         int marcheState = 0; //État de départ
         int nbEtatsMarche = 2; // Combien il y a de rectanbles pour l'état "Marcher"
-        public Rectangle[] tabMarcheDroite = { new Rectangle(421, 140, 71, 75), new Rectangle(421, 0, 71, 70) };
-        public Rectangle[] tabMarcheGauche = { new Rectangle(140, 0, 70, 74), new Rectangle(145, 140, 70, 70) };
-        public Rectangle[] tabMarcheHaut = { new Rectangle(290, 0, 70, 74), new Rectangle(290, 140, 70, 75) };
-        public Rectangle[] tabMarcheBas = { new Rectangle(0, 0, 70, 74), new Rectangle(0, 140, 70, 75) };
+        public Rectangle[] tabMarcheDroite = { new Rectangle(461, 0, 75, 75), new Rectangle(574, 0, 75, 75) };
+        public Rectangle[] tabMarcheGauche = { new Rectangle(11, 0, 75, 75), new Rectangle(123, 0, 75, 75) };
+        public Rectangle[] tabMarcheHaut = { new Rectangle(687, 0, 75, 75), new Rectangle(799, 0, 75, 75) };
+        public Rectangle[] tabMarcheBas = { new Rectangle(236, 0, 75, 75), new Rectangle(349, 0, 75, 75) };
 
         // Arrêt
         int waitState = 0;
-        public Rectangle[] tabAttenteDroite = { new Rectangle(421, 140, 71, 75) };
-        public Rectangle[] tabAttenteGauche = { new Rectangle(140, 0, 70, 74) };
-        public Rectangle[] tabAttenteHaut = { new Rectangle(290, 0, 70, 74) };
-        public Rectangle[] tabAttenteBas = { new Rectangle(0, 0, 70, 74) };
-
-        // Attaque
-        int attackState = 0;
-        public Rectangle[] tabAttaqueDroite = { new Rectangle(393, 421, 75, 72) };
+        public Rectangle[] tabAttenteDroite = { new Rectangle(461, 0, 75, 75) };
+        public Rectangle[] tabAttenteGauche = { new Rectangle(11, 0, 75, 75) };
+        public Rectangle[] tabAttenteHaut = { new Rectangle(687, 0, 75, 75) };
+        public Rectangle[] tabAttenteBas = { new Rectangle(236, 0, 75, 75) };
 
         public virtual void Update(GameTime gameTime)
         {
@@ -80,14 +78,6 @@ namespace Exercice01
                 spriteAffiche = tabMarcheBas[marcheState];
             }
 
-            // Attaque
-            if (etat == Etat.AttaqueDroite)
-            {
-                spriteAffiche = tabAttaqueDroite[attackState];
-            }
-
-
-
             // Compteur permettant de gérer le changement d'images
             compteur++;
             if (compteur == 10)
@@ -99,6 +89,21 @@ namespace Exercice01
                 }
 
                 compteur = 0;
+            }
+            
+            // Change la direction de l'enemie après un certain temps
+            if(gameTime.TotalGameTime.Seconds >= secondeDebut + secondeAttente)
+            {
+                secondeDebut = gameTime.TotalGameTime.Seconds;
+                etat = (Etat)rnd.Next(0, 8);
+                if((etat == Etat.AttenteBas) || (etat == Etat.AttenteDroite) || (etat == Etat.AttenteHaut) || (etat == Etat.AttenteGauche))
+                {
+                    secondeAttente = 1;
+                }
+                else
+                {
+                    secondeAttente = rnd.Next(2, 4);
+                }
             }
         }
     }

@@ -41,6 +41,8 @@
     <Compile Include="Game1.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="GameObjectAnime.cs" />
+    <Compile Include="GameObjectAnimeEnemy.cs" />
+    <Compile Include="GameObjectAnime_Missile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -52,14 +54,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Ennemis01.png">
+    <Content Include="Content\Background.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\Fleche.png">
+    <Content Include="Content\Enemy_Missile.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\Link.png" />
-    <Content Include="Content\Link01.png">
+    <Content Include="Content\Enemy_RedMoblin.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\LinkSheet.png">
