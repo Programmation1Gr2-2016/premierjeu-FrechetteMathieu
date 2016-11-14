@@ -23,3 +23,7 @@ D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathi
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\obj\x86\Debug\Exercice01.csprojResolveAssemblyReference.cache
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\obj\x86\Debug\Exercice01.exe
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\obj\x86\Debug\Exercice01.pdb
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Link01.png
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Ennemis01.png
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Fleche.png
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\LinkSheet.png
