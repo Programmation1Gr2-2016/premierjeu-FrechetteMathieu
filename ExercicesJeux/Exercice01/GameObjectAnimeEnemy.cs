@@ -17,8 +17,10 @@ namespace Exercice01
         public Vector2 direction;
         public Rectangle spriteAffiche;
 
+        public GameObjectAnime_Missile missile; // Test de lier le missile a l'enemy
+
         private int secondeDebut = 0;
-        private int secondeAttente = 5;
+        public int secondeAttente = 1;
         private Random rnd = new Random();
 
         public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite };

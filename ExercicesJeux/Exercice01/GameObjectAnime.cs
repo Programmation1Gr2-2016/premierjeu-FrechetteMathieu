@@ -17,9 +17,13 @@ namespace Exercice01
         public Vector2 direction;
         public Rectangle spriteAffiche;
 
-        public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite };
+        public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite, AttaqueGauche, AttaqueHaut, AttaqueBas, Mort };
         public Etat etat;
         private int compteur = 0;
+
+        public GameObjectAnime_Missile arme = new GameObjectAnime_Missile();
+        private int debutCoupArme = 0;
+        private int dureeVieCoup = 1;
 
         // Gestion des tableaux de sprites (chaque sprite est un rectangle dans le tableau)
 
@@ -40,7 +44,28 @@ namespace Exercice01
 
         // Attaque
         int attackState = 0;
-        public Rectangle[] tabAttaqueDroite = { new Rectangle(393, 421, 75, 72) };
+        public Rectangle[] tabAttaqueDroite = { new Rectangle(393, 417, 75, 75) };
+        public Rectangle[] tabAttaqueGauche = { new Rectangle(164, 417, 75, 75) };
+        public Rectangle[] tabAttaqueHaut = { new Rectangle(281, 445, 75, 75) };
+        public Rectangle[] tabAttaqueBas = { new Rectangle(0, 393, 75, 75) };
+
+        // Mort
+        int mortState = 0;
+        public Rectangle[] tabMort = { new Rectangle(1265, 702, 75, 75) };
+
+        public virtual void InitializeArme()
+        {
+            arme.estVivant = false;
+            arme.tabTirGauche[0] =  new Rectangle(112, 417, 52, 75);
+            arme.tabTirDroite[0] = new Rectangle(468, 417, 52, 75);
+            arme.tabTirHaut[0] = new Rectangle(281, 393, 75, 52);
+            arme.tabTirBas[0] = new Rectangle(0, 468, 75, 52);
+            arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
+            //tabEnemy[i].missile.vitesse = 3;
+            arme.sprite = this.sprite;
+            //tabEnemy[i].missile.direction = Vector2.Zero;
+            //tabEnemy[i].missile.position = new Rectangle(fenetre.Right / 2, fenetre.Bottom / 2, 75, 75);
+        }
 
         public virtual void Update(GameTime gameTime)
         {
@@ -80,13 +105,58 @@ namespace Exercice01
                 spriteAffiche = tabMarcheBas[marcheState];
             }
 
+            // Mort
+            if(etat == Etat.Mort)
+            {
+                spriteAffiche = tabMort[mortState];
+            }
+
             // Attaque
+            if((etat== Etat.AttaqueDroite)|| (etat == Etat.AttaqueGauche)|| (etat == Etat.AttaqueHaut)|| (etat == Etat.AttaqueBas))
+            {
+                //arme.estVivant = true;
+                debutCoupArme = gameTime.TotalGameTime.Seconds;
+                arme.position = this.position;
+            }
+
             if (etat == Etat.AttaqueDroite)
             {
                 spriteAffiche = tabAttaqueDroite[attackState];
+                arme.etat = GameObjectAnime_Missile.Etat.TirDroite;
+                arme.position.X = this.position.X + this.position.Width;
+                arme.position.Width = arme.tabTirDroite[0].Width;
+                arme.Update(gameTime);
+            }
+            if (etat == Etat.AttaqueGauche)
+            {
+                spriteAffiche = tabAttaqueGauche[attackState];
+                arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
+                arme.position.X = this.position.X - arme.tabTirGauche[0].Width;
+                arme.position.Width = arme.tabTirGauche[0].Width;
+                arme.Update(gameTime);
+            }
+            if (etat == Etat.AttaqueHaut)
+            {
+                spriteAffiche = tabAttaqueHaut[attackState];
+                arme.etat = GameObjectAnime_Missile.Etat.TirHaut;
+                arme.position.Y = this.position.Y - arme.tabTirHaut[0].Height;
+                arme.position.Height = arme.tabTirHaut[0].Height;
+                arme.Update(gameTime);
+            }
+            if (etat == Etat.AttaqueBas)
+            {
+                spriteAffiche = tabAttaqueBas[attackState];
+                arme.etat = GameObjectAnime_Missile.Etat.TirBas;
+                arme.position.Y = this.position.Y + arme.tabTirHaut[0].Height;
+                arme.position.Height = arme.tabTirHaut[0].Height;
+                arme.Update(gameTime);
             }
 
 
+            //if(gameTime.TotalGameTime.Seconds>debutCoupArme + dureeVieCoup)
+            //{
+            //    arme.estVivant = false;
+            //}
 
             // Compteur permettant de gérer le changement d'images
             compteur++;
