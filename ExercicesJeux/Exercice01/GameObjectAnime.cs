@@ -16,6 +16,7 @@ namespace Exercice01
         public bool estVivant;
         public Vector2 direction;
         public Rectangle spriteAffiche;
+        public int pointDeVie;
 
         public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite, AttaqueGauche, AttaqueHaut, AttaqueBas, Mort };
         public Etat etat;
@@ -147,7 +148,7 @@ namespace Exercice01
             {
                 spriteAffiche = tabAttaqueBas[attackState];
                 arme.etat = GameObjectAnime_Missile.Etat.TirBas;
-                arme.position.Y = this.position.Y + arme.tabTirHaut[0].Height;
+                arme.position.Y = this.position.Y + this.position.Height;
                 arme.position.Height = arme.tabTirHaut[0].Height;
                 arme.Update(gameTime);
             }

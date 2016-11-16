@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Profile>Reach</Profile>
+  <Platform>Windows</Platform>
+  <Config />
+  <SourceFiles>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/Overworld.mp3</File>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/LOZ_Enemy_Die.wav</File>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/LOZ_Enemy_Hit.wav</File>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/LOZ_Link_Die.wav</File>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/LOZ_Link_Hurt.wav</File>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/LOZ_Shield.wav</File>
+    <File>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/LOZ_Sword_Slash.wav</File>
+  </SourceFiles>
+</SourceFileCollection>

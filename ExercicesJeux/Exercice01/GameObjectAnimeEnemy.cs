@@ -44,6 +44,10 @@ namespace Exercice01
 
         public virtual void Update(GameTime gameTime)
         {
+            if (this.estVivant == true)
+            {
+
+            }
             // Attente
             if (etat == Etat.AttenteDroite)
             {

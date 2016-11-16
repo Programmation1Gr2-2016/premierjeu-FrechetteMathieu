@@ -31,7 +31,6 @@ namespace Exercice01
 
         public virtual void Update(GameTime gameTime)
         {
-
             if (etat == Etat.TirDroite)
             {
                 spriteAffiche = tabTirDroite[tirState];
