@@ -16,12 +16,19 @@ namespace Exercice01
         public bool estVivant;
         public Vector2 direction;
         public Rectangle spriteAffiche;
+        public int debutAttenteSpawnEnemy = 0;
 
-        public GameObjectAnime_Missile missile; // Test de lier le missile a l'enemy
+        public string imgEnemy;
+        public string imgMissile;
+
+        public enum TypeEnemy { RedMoblin, BlueMoblin };
+        public TypeEnemy typeEnemy;
+
+        public GameObjectAnime_Missile arme; // Test de lier le missile a l'enemy
 
         private int secondeDebut = 0;
         public int secondeAttente = 1;
-        private Random rnd = new Random();
+        private Random rnd = new Random(Guid.NewGuid().GetHashCode());
 
         public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite };
         public Etat etat;
@@ -41,6 +48,54 @@ namespace Exercice01
         public Rectangle[] tabAttenteGauche = { new Rectangle(11, 0, 75, 75) };
         public Rectangle[] tabAttenteHaut = { new Rectangle(687, 0, 75, 75) };
         public Rectangle[] tabAttenteBas = { new Rectangle(236, 0, 75, 75) };
+
+        public GameObjectAnimeEnemy(TypeEnemy typeEnemy)
+        {
+            estVivant = true;
+            //tabEnemy[i].direction = Vector2.Zero;
+
+            switch (typeEnemy)
+            {
+                case TypeEnemy.RedMoblin:
+                    //Enemy
+                    imgEnemy = "Images\\Enemy_RedMoblin.png";
+
+                    // Missile
+                    arme = new GameObjectAnime_Missile();
+                    imgMissile = "Images\\Enemy_Missile.png";
+                    vitesse = 2;
+                    secondeAttente = rnd.Next(0, 5);
+                    etat = (Etat)rnd.Next(0,6);
+                    break;
+
+                case TypeEnemy.BlueMoblin:
+                    //Enemy
+                    imgEnemy = "Images\\Enemy_BlueMoblin.png";
+
+                    // Missile
+                    arme = new GameObjectAnime_Missile();
+                    imgMissile = "Images\\Enemy_Missile.png";
+                    vitesse = 1;
+                    secondeAttente = rnd.Next(0, 3);
+                    etat = (Etat)rnd.Next(0, 6);
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public virtual void InitializeArme()
+        {
+            arme.estVivant = false;
+            arme.degatArme = 1;
+            arme.tabTirGauche[0] = new Rectangle(112, 417, 52, 75);
+            arme.tabTirDroite[0] = new Rectangle(468, 417, 52, 75);
+            arme.tabTirHaut[0] = new Rectangle(281, 393, 75, 52);
+            arme.tabTirBas[0] = new Rectangle(0, 468, 75, 52);
+            //arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
+            arme.sprite = this.sprite;
+        }
 
         public virtual void Update(GameTime gameTime)
         {

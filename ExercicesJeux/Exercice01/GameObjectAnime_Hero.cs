@@ -8,23 +8,26 @@ using System.Threading.Tasks;
 
 namespace Exercice01
 {
-    class GameObjectAnime
+    class GameObjectAnime_Hero
     {
         public Rectangle position;
         public int vitesse;
         public Texture2D sprite;
         public bool estVivant;
+        public bool estInvincible;
         public Vector2 direction;
         public Rectangle spriteAffiche;
         public int pointDeVie;
-
+        public int vieMax = 6;
+        public string imgHero;
         public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite, AttaqueGauche, AttaqueHaut, AttaqueBas, Mort };
         public Etat etat;
         private int compteur = 0;
+        public int compteurInvicibilite = 0;
 
         public GameObjectAnime_Missile arme = new GameObjectAnime_Missile();
         private int debutCoupArme = 0;
-        private int dureeVieCoup = 1;
+        //private int dureeVieCoup = 1;
 
         // Gestion des tableaux de sprites (chaque sprite est un rectangle dans le tableau)
 
@@ -54,18 +57,28 @@ namespace Exercice01
         int mortState = 0;
         public Rectangle[] tabMort = { new Rectangle(1265, 702, 75, 75) };
 
+        public GameObjectAnime_Hero()
+        {
+            position = new Rectangle(100, 100, 75, 75);
+            vitesse = 2;
+            pointDeVie = 6;
+            imgHero = "Images\\LinkSheet.png";
+            direction = Vector2.Zero;
+            etat = GameObjectAnime_Hero.Etat.AttenteDroite;
+            estVivant = true;
+            estInvincible = false;
+        }
+
         public virtual void InitializeArme()
         {
             arme.estVivant = false;
+            arme.degatArme = 1;
             arme.tabTirGauche[0] =  new Rectangle(112, 417, 52, 75);
             arme.tabTirDroite[0] = new Rectangle(468, 417, 52, 75);
             arme.tabTirHaut[0] = new Rectangle(281, 393, 75, 52);
             arme.tabTirBas[0] = new Rectangle(0, 468, 75, 52);
             arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
-            //tabEnemy[i].missile.vitesse = 3;
             arme.sprite = this.sprite;
-            //tabEnemy[i].missile.direction = Vector2.Zero;
-            //tabEnemy[i].missile.position = new Rectangle(fenetre.Right / 2, fenetre.Bottom / 2, 75, 75);
         }
 
         public virtual void Update(GameTime gameTime)
@@ -169,7 +182,22 @@ namespace Exercice01
                     marcheState = 0;
                 }
 
+                if (estInvincible)
+                {
+                    //estInvincible = false;
+                }
                 compteur = 0;
+            }
+
+            // Compteur permettant de gérer la durée d'invicibilité du héro
+            if (estInvincible)
+            {
+                compteurInvicibilite++;
+                if (compteurInvicibilite == 45)
+                {
+                    estInvincible = false;
+                    compteurInvicibilite = 0;
+                }
             }
         }
     }

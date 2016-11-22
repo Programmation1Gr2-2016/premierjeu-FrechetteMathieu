@@ -12,7 +12,13 @@ namespace Exercice01
     /// </summary>
     public class Game1 : Game
     {
-        int fullScreen = 1;
+        int fullScreen = 0;
+        int positionCoeur;
+        int attenteSpawnEnemy = 3;
+        int compteurEnemyTue = 0;
+        string messageGameOver = "***** Game Over *****";
+        Random rnd = new Random();
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         KeyboardState keys = new KeyboardState();
@@ -25,12 +31,9 @@ namespace Exercice01
         Texture2D coeurMoitie;
         Texture2D coeurVide;
 
-        GameObjectAnime link;
-        //GameObjectAnimeEnemy enemy;
-        //GameObjectAnime_Missile missile;
-        GameObjectAnimeEnemy[] tabEnemy = new GameObjectAnimeEnemy[4];
-        Random rnd = new Random();
-        GameObjectAnime.Etat etatHeroAvantAttaque = GameObjectAnime.Etat.AttenteGauche;
+        GameObjectAnime_Hero link;
+        GameObjectAnimeEnemy[] tabEnemy = new GameObjectAnimeEnemy[10];
+        GameObjectAnime_Hero.Etat etatHeroAvantAttaque = GameObjectAnime_Hero.Etat.AttenteGauche;
 
         SoundEffect sonCoupEpee;
         SoundEffectInstance coupEpee;
@@ -40,6 +43,8 @@ namespace Exercice01
         SoundEffectInstance linkTouche;
         SoundEffect sonMortEnemy;
         SoundEffectInstance mortEnemy;
+
+        SpriteFont font;
 
         public Game1()
         {
@@ -91,11 +96,12 @@ namespace Exercice01
             coeurMoitie = Content.Load<Texture2D>("Images\\CoeurMoitie.png");
             coeurVide = Content.Load<Texture2D>("Images\\CoeurVide.png");
 
-
             Song song = Content.Load<Song>("Sounds\\Overworld");
             MediaPlayer.Volume = (float)0.75;
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Play(song);
+
+            font = Content.Load<SpriteFont>("Fonts\\Font");
 
             sonCoupEpee = Content.Load<SoundEffect>("Sounds\\LOZ_Sword_Slash");
             coupEpee = sonCoupEpee.CreateInstance();
@@ -106,35 +112,24 @@ namespace Exercice01
             sonMortEnemy = Content.Load<SoundEffect>("Sounds\\LOZ_Enemy_Die");
             mortEnemy = sonMortEnemy.CreateInstance();
 
-
-            link = new GameObjectAnime();
-            link.position = new Rectangle(300, 100, 75, 75);
-            link.vitesse = 2;
-            link.pointDeVie = 6;
-            link.sprite = Content.Load<Texture2D>("Images\\LinkSheet.png");
-            link.direction = Vector2.Zero;
-            link.etat = GameObjectAnime.Etat.AttenteDroite;
+            link = new GameObjectAnime_Hero();
+            link.sprite = Content.Load<Texture2D>(link.imgHero);
             link.InitializeArme();
-            link.estVivant = true;
 
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
-                tabEnemy[i] = new GameObjectAnimeEnemy();
-                tabEnemy[i].position = new Rectangle(fenetre.Right - 75, fenetre.Bottom - (i * 150), 75, 75); // A FAIRE: Générer un position aléatoire pour les enemy qui n'entre pas en conflit avec la position du héro
-                tabEnemy[i].vitesse = 2;
-                tabEnemy[i].secondeAttente = rnd.Next(0, 5);
-                tabEnemy[i].sprite = Content.Load<Texture2D>("Images\\Enemy_RedMoblin.png");
-                tabEnemy[i].direction = Vector2.Zero;
-                tabEnemy[i].etat = GameObjectAnimeEnemy.Etat.MarcheGauche;
-                tabEnemy[i].estVivant = true;
+                tabEnemy[i] = new GameObjectAnimeEnemy((GameObjectAnimeEnemy.TypeEnemy)rnd.Next(0,2));
+                tabEnemy[i].sprite = Content.Load<Texture2D>(tabEnemy[i].imgEnemy);
+                tabEnemy[i].position = new Rectangle(rnd.Next(400,fenetre.Right - 75), rnd.Next(400,fenetre.Bottom-75), 75, 75);
+                
 
-                tabEnemy[i].missile = new GameObjectAnime_Missile();
-                tabEnemy[i].missile.vitesse = 3;
-                tabEnemy[i].missile.sprite = Content.Load<Texture2D>("Images\\Enemy_Missile.png");
-                tabEnemy[i].missile.direction = Vector2.Zero;
-                tabEnemy[i].missile.etat = GameObjectAnime_Missile.Etat.TirGauche;
-                tabEnemy[i].missile.estVivant = false;
-                tabEnemy[i].missile.position = new Rectangle(fenetre.Right / 2, fenetre.Bottom / 2, 75, 75);
+                //tabEnemy[i].missile = new GameObjectAnime_Missile();
+                tabEnemy[i].arme.vitesse = 3;
+                tabEnemy[i].arme.sprite = Content.Load<Texture2D>(tabEnemy[i].imgMissile);
+                tabEnemy[i].arme.direction = Vector2.Zero;
+                tabEnemy[i].arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
+                tabEnemy[i].arme.estVivant = false;
+                tabEnemy[i].arme.position = new Rectangle(fenetre.Right / 2, fenetre.Bottom / 2, 75, 75);
             }
 
         }
@@ -162,15 +157,14 @@ namespace Exercice01
             UpdateHeros(gameTime);
             UpdateEnemy(gameTime);
             UpdateMissile(gameTime);
-            UpdateInventaire(gameTime);
-            Collision();
+            Collision(gameTime);
 
             base.Update(gameTime);
         }
 
         protected void UpdateHeros(GameTime gameTime)
         {
-            if (link.etat != GameObjectAnime.Etat.Mort)
+            if (link.etat != GameObjectAnime_Hero.Etat.Mort)
             {
                 keys = Keyboard.GetState();
                 link.position.X += (int)(link.vitesse * link.direction.X);
@@ -180,48 +174,48 @@ namespace Exercice01
                 if (keys.IsKeyDown(Keys.Right))
                 {
                     link.direction.X = 2;
-                    link.etat = GameObjectAnime.Etat.MarcheDroite;
+                    link.etat = GameObjectAnime_Hero.Etat.MarcheDroite;
                 }
                 if (keys.IsKeyUp(Keys.Right) && previousKeys.IsKeyDown(Keys.Right))
                 {
                     link.direction.X = 0;
-                    link.etat = GameObjectAnime.Etat.AttenteDroite;
+                    link.etat = GameObjectAnime_Hero.Etat.AttenteDroite;
                 }
 
                 // Touche de direction gauche
                 if (keys.IsKeyDown(Keys.Left))
                 {
                     link.direction.X = -2;
-                    link.etat = GameObjectAnime.Etat.MarcheGauche;
+                    link.etat = GameObjectAnime_Hero.Etat.MarcheGauche;
                 }
                 if (keys.IsKeyUp(Keys.Left) && previousKeys.IsKeyDown(Keys.Left))
                 {
                     link.direction.X = 0;
-                    link.etat = GameObjectAnime.Etat.AttenteGauche;
+                    link.etat = GameObjectAnime_Hero.Etat.AttenteGauche;
                 }
 
                 // Touche de direction haut
                 if (keys.IsKeyDown(Keys.Up))
                 {
                     link.direction.Y = -2;
-                    link.etat = GameObjectAnime.Etat.MarcheHaut;
+                    link.etat = GameObjectAnime_Hero.Etat.MarcheHaut;
                 }
                 if (keys.IsKeyUp(Keys.Up) && previousKeys.IsKeyDown(Keys.Up))
                 {
                     link.direction.Y = 0;
-                    link.etat = GameObjectAnime.Etat.AttenteHaut;
+                    link.etat = GameObjectAnime_Hero.Etat.AttenteHaut;
                 }
 
                 // Touche de direction bas
                 if (keys.IsKeyDown(Keys.Down))
                 {
                     link.direction.Y = 2;
-                    link.etat = GameObjectAnime.Etat.MarcheBas;
+                    link.etat = GameObjectAnime_Hero.Etat.MarcheBas;
                 }
                 if (keys.IsKeyUp(Keys.Down) && previousKeys.IsKeyDown(Keys.Down))
                 {
                     link.direction.Y = 0;
-                    link.etat = GameObjectAnime.Etat.AttenteBas;
+                    link.etat = GameObjectAnime_Hero.Etat.AttenteBas;
                 }
 
                 // Touche attaque primaire
@@ -259,7 +253,7 @@ namespace Exercice01
                 previousKeys = keys;
             }
 
-            link.Update(gameTime);     
+            link.Update(gameTime);
 
         }
 
@@ -268,25 +262,25 @@ namespace Exercice01
             if (link.arme.estVivant)
             {
                 coupEpee.Play();
-                if ((link.etat == GameObjectAnime.Etat.MarcheGauche) || (link.etat == GameObjectAnime.Etat.AttenteGauche))
+                if ((link.etat == GameObjectAnime_Hero.Etat.MarcheGauche) || (link.etat == GameObjectAnime_Hero.Etat.AttenteGauche))
                 {
                     etatHeroAvantAttaque = link.etat;
-                    link.etat = GameObjectAnime.Etat.AttaqueGauche;
+                    link.etat = GameObjectAnime_Hero.Etat.AttaqueGauche;
                 }
-                else if ((link.etat == GameObjectAnime.Etat.MarcheDroite) || (link.etat == GameObjectAnime.Etat.AttenteDroite))
+                else if ((link.etat == GameObjectAnime_Hero.Etat.MarcheDroite) || (link.etat == GameObjectAnime_Hero.Etat.AttenteDroite))
                 {
                     etatHeroAvantAttaque = link.etat;
-                    link.etat = GameObjectAnime.Etat.AttaqueDroite;
+                    link.etat = GameObjectAnime_Hero.Etat.AttaqueDroite;
                 }
-                else if ((link.etat == GameObjectAnime.Etat.MarcheHaut) || (link.etat == GameObjectAnime.Etat.AttenteHaut))
+                else if ((link.etat == GameObjectAnime_Hero.Etat.MarcheHaut) || (link.etat == GameObjectAnime_Hero.Etat.AttenteHaut))
                 {
                     etatHeroAvantAttaque = link.etat;
-                    link.etat = GameObjectAnime.Etat.AttaqueHaut;
+                    link.etat = GameObjectAnime_Hero.Etat.AttaqueHaut;
                 }
-                else if ((link.etat == GameObjectAnime.Etat.MarcheBas) || (link.etat == GameObjectAnime.Etat.AttenteBas))
+                else if ((link.etat == GameObjectAnime_Hero.Etat.MarcheBas) || (link.etat == GameObjectAnime_Hero.Etat.AttenteBas))
                 {
                     etatHeroAvantAttaque = link.etat;
-                    link.etat = GameObjectAnime.Etat.AttaqueBas;
+                    link.etat = GameObjectAnime_Hero.Etat.AttaqueBas;
                 }
             }
             else
@@ -336,11 +330,11 @@ namespace Exercice01
 
                         case GameObjectAnimeEnemy.Etat.AttenteDroite:
                             tabEnemy[i].direction.X = 0;
-                            if (tabEnemy[i].missile.estVivant != true)
+                            if (tabEnemy[i].arme.estVivant != true)
                             {
-                                tabEnemy[i].missile.estVivant = true;
-                                tabEnemy[i].missile.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 75, 24);
-                                tabEnemy[i].missile.etat = GameObjectAnime_Missile.Etat.TirDroite;
+                                tabEnemy[i].arme.estVivant = true;
+                                tabEnemy[i].arme.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 75, 24);
+                                tabEnemy[i].arme.etat = GameObjectAnime_Missile.Etat.TirDroite;
                             }
                             break;
 
@@ -350,11 +344,11 @@ namespace Exercice01
 
                         case GameObjectAnimeEnemy.Etat.AttenteGauche:
                             tabEnemy[i].direction.X = 0;
-                            if (tabEnemy[i].missile.estVivant != true)
+                            if (tabEnemy[i].arme.estVivant != true)
                             {
-                                tabEnemy[i].missile.estVivant = true;
-                                tabEnemy[i].missile.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 75, 24);
-                                tabEnemy[i].missile.etat = GameObjectAnime_Missile.Etat.TirGauche;
+                                tabEnemy[i].arme.estVivant = true;
+                                tabEnemy[i].arme.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 75, 24);
+                                tabEnemy[i].arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
                             }
                             break;
 
@@ -364,11 +358,11 @@ namespace Exercice01
 
                         case GameObjectAnimeEnemy.Etat.AttenteHaut:
                             tabEnemy[i].direction.Y = 0;
-                            if (tabEnemy[i].missile.estVivant != true)
+                            if (tabEnemy[i].arme.estVivant != true)
                             {
-                                tabEnemy[i].missile.estVivant = true;
-                                tabEnemy[i].missile.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 24, 75);
-                                tabEnemy[i].missile.etat = GameObjectAnime_Missile.Etat.TirHaut;
+                                tabEnemy[i].arme.estVivant = true;
+                                tabEnemy[i].arme.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 24, 75);
+                                tabEnemy[i].arme.etat = GameObjectAnime_Missile.Etat.TirHaut;
                             }
                             break;
 
@@ -378,17 +372,37 @@ namespace Exercice01
 
                         case GameObjectAnimeEnemy.Etat.AttenteBas:
                             tabEnemy[i].direction.Y = 0;
-                            if (tabEnemy[i].missile.estVivant != true)
+                            if (tabEnemy[i].arme.estVivant != true)
                             {
-                                tabEnemy[i].missile.estVivant = true;
-                                tabEnemy[i].missile.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 24, 75);
-                                tabEnemy[i].missile.etat = GameObjectAnime_Missile.Etat.TirBas;
+                                tabEnemy[i].arme.estVivant = true;
+                                tabEnemy[i].arme.position = new Rectangle(tabEnemy[i].position.X, tabEnemy[i].position.Y, 24, 75);
+                                tabEnemy[i].arme.etat = GameObjectAnime_Missile.Etat.TirBas;
                             }
                             break;
                     }
 
-                    tabEnemy[i].Update(gameTime);
+
                 }
+                else
+                {
+                    // À toutes les x secondes, respawn un monstre s'il y en a moins de 4
+                    //if (gameTime.TotalGameTime.Seconds >= debutAttenteSpawnEnemy + attenteSpawnEnemy)
+                    //{
+                    //    for (int i = 0; i < tabEnemy.GetLength(0); i++)
+                    //    {
+                    //        if (tabEnemy[i].estVivant == false)
+                    //        {
+                    //            tabEnemy[i].estVivant = true;
+                    //            i = tabEnemy.GetLength(0) + 1;
+                    //        }
+                    //    }
+                    //}
+                    if (gameTime.TotalGameTime.Seconds >= tabEnemy[i].debutAttenteSpawnEnemy + attenteSpawnEnemy)
+                    {
+                        tabEnemy[i].estVivant = true;
+                    }
+                }
+                tabEnemy[i].Update(gameTime);
             }
         }
 
@@ -396,34 +410,34 @@ namespace Exercice01
         {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
-                if(tabEnemy[i].estVivant != true)
+                if (tabEnemy[i].estVivant != true)
                 {
-                    tabEnemy[i].missile.estVivant = false;
+                    tabEnemy[i].arme.estVivant = false;
                 }
 
-                if (tabEnemy[i].missile.estVivant)
+                if (tabEnemy[i].arme.estVivant)
                 {
-                    tabEnemy[i].missile.position.X += (int)(tabEnemy[i].missile.vitesse * tabEnemy[i].missile.direction.X);
-                    tabEnemy[i].missile.position.Y += (int)(tabEnemy[i].missile.vitesse * tabEnemy[i].missile.direction.Y);
+                    tabEnemy[i].arme.position.X += (int)(tabEnemy[i].arme.vitesse * tabEnemy[i].arme.direction.X);
+                    tabEnemy[i].arme.position.Y += (int)(tabEnemy[i].arme.vitesse * tabEnemy[i].arme.direction.Y);
 
-                    switch (tabEnemy[i].missile.etat)
+                    switch (tabEnemy[i].arme.etat)
                     {
                         case GameObjectAnime_Missile.Etat.TirDroite:
-                            tabEnemy[i].missile.direction.X = tabEnemy[i].missile.vitesse;
-                            tabEnemy[i].missile.direction.Y = 0;
+                            tabEnemy[i].arme.direction.X = tabEnemy[i].arme.vitesse;
+                            tabEnemy[i].arme.direction.Y = 0;
                             break;
 
                         case GameObjectAnime_Missile.Etat.TirGauche:
-                            tabEnemy[i].missile.direction.X = -tabEnemy[i].missile.vitesse;
-                            tabEnemy[i].missile.direction.Y = 0;
+                            tabEnemy[i].arme.direction.X = -tabEnemy[i].arme.vitesse;
+                            tabEnemy[i].arme.direction.Y = 0;
                             break;
                         case GameObjectAnime_Missile.Etat.TirHaut:
-                            tabEnemy[i].missile.direction.X = 0;
-                            tabEnemy[i].missile.direction.Y = -tabEnemy[i].missile.vitesse;
+                            tabEnemy[i].arme.direction.X = 0;
+                            tabEnemy[i].arme.direction.Y = -tabEnemy[i].arme.vitesse;
                             break;
                         case GameObjectAnime_Missile.Etat.TirBas:
-                            tabEnemy[i].missile.direction.X = 0;
-                            tabEnemy[i].missile.direction.Y = tabEnemy[i].missile.vitesse;
+                            tabEnemy[i].arme.direction.X = 0;
+                            tabEnemy[i].arme.direction.Y = tabEnemy[i].arme.vitesse;
                             break;
                         default:
                             break;
@@ -432,47 +446,53 @@ namespace Exercice01
                     // Teste les collisions avec le héro
 
                     // Si le missile sort de l'écran, estVivant devient false
-                    if ((tabEnemy[i].missile.position.X < fenetre.Left) || (tabEnemy[i].missile.position.X > fenetre.Right) || (tabEnemy[i].missile.position.Y < fenetre.Top) || (tabEnemy[i].missile.position.Y > fenetre.Bottom))
+                    if ((tabEnemy[i].arme.position.X < fenetre.Left) || (tabEnemy[i].arme.position.X > fenetre.Right) || (tabEnemy[i].arme.position.Y < fenetre.Top) || (tabEnemy[i].arme.position.Y > fenetre.Bottom))
                     {
-                       tabEnemy[i].missile.estVivant = false;
+                        tabEnemy[i].arme.estVivant = false;
                     }
 
-                    tabEnemy[i].missile.Update(gameTime);
+                    tabEnemy[i].arme.Update(gameTime);
                 }
             }
 
         }
 
-        protected void UpdateInventaire(GameTime gameTime)
-        {
-
-        }
-
-        protected void Collision()
+        protected void Collision(GameTime gameTime)
         {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
-                if (tabEnemy[i].estVivant && link.estVivant && link.position.Intersects(tabEnemy[i].position))
+                if (tabEnemy[i].estVivant && link.estVivant && link.estInvincible!=true && link.position.Intersects(tabEnemy[i].position))
                 {
                     link.pointDeVie -= 1;
-                    if(link.pointDeVie > 0)
+                    if (link.pointDeVie > 0)
                     {
                         linkTouche.Play();
-                        link.position.X -= 100;
+                        link.estInvincible = true;
+                        link.position = new Rectangle(link.position.X - 100, link.position.Y -= 100, link.position.Width, link.position.Height);
                     }
                     else
                     {
                         link.estVivant = false;
-                        link.etat = GameObjectAnime.Etat.Mort;
+                        link.etat = GameObjectAnime_Hero.Etat.Mort;
                     }
                 }
 
-                if (tabEnemy[i].missile.estVivant && link.estVivant && link.position.Intersects(tabEnemy[i].missile.position))
+                if (tabEnemy[i].arme.estVivant && link.estVivant && link.estInvincible != true && link.position.Intersects(tabEnemy[i].arme.position))
                 {
-                    mortLink.Play();
-                    tabEnemy[i].missile.estVivant = false;
-                    link.estVivant = false;
-                    link.etat = GameObjectAnime.Etat.Mort;
+                    link.pointDeVie -= 2;
+                    link.estInvincible = true;
+                    if (link.pointDeVie > 0)
+                    {
+                        linkTouche.Play();
+                        link.position.X -= 100;
+                        link.position = new Rectangle(link.position.X - 100, link.position.Y -= 100, link.position.Width, link.position.Height);
+                    }
+                    else
+                    {
+                        link.estVivant = false;
+                        link.etat = GameObjectAnime_Hero.Etat.Mort;
+                        sonMortLink.Play();
+                    }
                 }
 
                 if (link.arme.estVivant && tabEnemy[i].estVivant)
@@ -480,7 +500,9 @@ namespace Exercice01
                     if (link.arme.position.Intersects(tabEnemy[i].position))
                     {
                         mortEnemy.Play();
+                        compteurEnemyTue++;
                         tabEnemy[i].estVivant = false;
+                        tabEnemy[i].debutAttenteSpawnEnemy = gameTime.TotalGameTime.Seconds;
                     }
                 }
             }
@@ -501,15 +523,12 @@ namespace Exercice01
             spriteBatch.Begin();
 
             spriteBatch.Draw(background, fenetre, Color.White);
-            spriteBatch.Draw(inventaire, new Rectangle(0,0,fenetre.Width,200), Color.White);
-
-            // Faire la logique pour afficher les coeurs selon les points de vie
-            spriteBatch.Draw(coeurPlein, new Rectangle(1000, 125, coeurPlein.Width, coeurPlein.Height), Color.White);
-            spriteBatch.Draw(coeurMoitie, new Rectangle(1000 + (coeurPlein.Width+5), 125, coeurMoitie.Width, coeurMoitie.Height), Color.White);
-            spriteBatch.Draw(coeurVide, new Rectangle(1000 + ((coeurPlein.Width+5)*2), 125, coeurVide.Width, coeurVide.Height), Color.White);
 
             spriteBatch.Draw(link.sprite, link.position, link.spriteAffiche, Color.White);
-
+            if (link.estVivant !=true)
+            {
+                spriteBatch.DrawString(font, messageGameOver, new Vector2((fenetre.Width/2) - (font.MeasureString(messageGameOver).X / 2), fenetre.Height/2), Color.Black);
+            }
 
             if (link.arme.estVivant)
             {
@@ -522,12 +541,36 @@ namespace Exercice01
                 {
                     spriteBatch.Draw(tabEnemy[i].sprite, tabEnemy[i].position, tabEnemy[i].spriteAffiche, Color.White);
 
-                    if (tabEnemy[i].missile.estVivant)
+                    if (tabEnemy[i].arme.estVivant)
                     {
-                        spriteBatch.Draw(tabEnemy[i].missile.sprite, tabEnemy[i].missile.position, tabEnemy[i].missile.spriteAffiche, Color.White);
+                        spriteBatch.Draw(tabEnemy[i].arme.sprite, tabEnemy[i].arme.position, tabEnemy[i].arme.spriteAffiche, Color.White);
                     }
                 }
 
+            }
+
+            spriteBatch.Draw(inventaire, new Rectangle(fenetre.Right - inventaire.Width, 50, inventaire.Width, inventaire.Height), Color.White);
+            spriteBatch.DrawString(font, "Enemis tues " + compteurEnemyTue.ToString(), new Vector2(fenetre.Right - inventaire.Width + 175, 90), Color.Gainsboro);
+
+            // Afficher le nombre de coeur vide correspondant a coeurMax
+            positionCoeur = fenetre.Right - inventaire.Width + 30;
+            for (int i = 0; i < link.vieMax / 2; i++)
+            {
+                spriteBatch.Draw(coeurVide, new Rectangle(positionCoeur, 100, coeurPlein.Width, coeurPlein.Height), Color.White);
+
+                positionCoeur += (coeurPlein.Width + 5);
+            }
+            // Ensuite calculer le nombre de coeur plein et ensuite afficher le dernier coeur a moitité ou non
+            positionCoeur = fenetre.Right - inventaire.Width + 30;
+            int nbCoeurPlein = link.pointDeVie / 2;
+            for (int i = 0; i < nbCoeurPlein; i++)
+            {
+                spriteBatch.Draw(coeurPlein, new Rectangle(positionCoeur, 100, coeurPlein.Width, coeurPlein.Height), Color.White);
+                positionCoeur += (coeurPlein.Width + 5);
+            }
+            if(link.pointDeVie%2 != 0)
+            {
+                spriteBatch.Draw(coeurMoitie, new Rectangle(positionCoeur, 100, coeurPlein.Width, coeurPlein.Height), Color.White);
             }
 
             spriteBatch.End();

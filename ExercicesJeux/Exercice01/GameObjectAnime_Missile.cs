@@ -12,6 +12,7 @@ namespace Exercice01
     {
         public Rectangle position;
         public int vitesse;
+        public int degatArme;
         public Texture2D sprite;
         public bool estVivant;
         public Vector2 direction;
