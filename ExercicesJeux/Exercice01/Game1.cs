@@ -12,7 +12,7 @@ namespace Exercice01
     /// </summary>
     public class Game1 : Game
     {
-        int fullScreen = 0;
+        int fullScreen = 1;
         int positionCoeur;
         int attenteSpawnEnemy = 3;
         int compteurEnemyTue = 0;
@@ -34,6 +34,7 @@ namespace Exercice01
         GameObjectAnime_Hero link;
         GameObjectAnimeEnemy[] tabEnemy = new GameObjectAnimeEnemy[10];
         GameObjectAnime_Hero.Etat etatHeroAvantAttaque = GameObjectAnime_Hero.Etat.AttenteGauche;
+        GameObjectTile fond = new GameObjectTile();
 
         SoundEffect sonCoupEpee;
         SoundEffectInstance coupEpee;
@@ -95,6 +96,7 @@ namespace Exercice01
             coeurPlein = Content.Load<Texture2D>("Images\\CoeurPlein.png");
             coeurMoitie = Content.Load<Texture2D>("Images\\CoeurMoitie.png");
             coeurVide = Content.Load<Texture2D>("Images\\CoeurVide.png");
+            fond.texture = Content.Load<Texture2D>("Images\\Overworld_Tiles");
 
             Song song = Content.Load<Song>("Sounds\\Overworld");
             MediaPlayer.Volume = (float)0.75;
@@ -118,10 +120,10 @@ namespace Exercice01
 
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
-                tabEnemy[i] = new GameObjectAnimeEnemy((GameObjectAnimeEnemy.TypeEnemy)rnd.Next(0,2));
+                tabEnemy[i] = new GameObjectAnimeEnemy((GameObjectAnimeEnemy.TypeEnemy)rnd.Next(0, 2));
                 tabEnemy[i].sprite = Content.Load<Texture2D>(tabEnemy[i].imgEnemy);
-                tabEnemy[i].position = new Rectangle(rnd.Next(400,fenetre.Right - 75), rnd.Next(400,fenetre.Bottom-75), 75, 75);
-                
+                tabEnemy[i].position = new Rectangle(rnd.Next(400, fenetre.Right - 75), rnd.Next(400, fenetre.Bottom - 75), 75, 75);
+
 
                 //tabEnemy[i].missile = new GameObjectAnime_Missile();
                 tabEnemy[i].arme.vitesse = 3;
@@ -167,8 +169,8 @@ namespace Exercice01
             if (link.etat != GameObjectAnime_Hero.Etat.Mort)
             {
                 keys = Keyboard.GetState();
-                link.position.X += (int)(link.vitesse * link.direction.X);
-                link.position.Y += (int)(link.vitesse * link.direction.Y);
+                //link.position.X += (int)(link.vitesse * link.direction.X);
+                //link.position.Y += (int)(link.vitesse * link.direction.Y);
 
                 // Touche de direction droite
                 if (keys.IsKeyDown(Keys.Right))
@@ -230,7 +232,8 @@ namespace Exercice01
                     AttaqueHero(gameTime);
                 }
 
-
+                link.position.X += (int)(link.vitesse * link.direction.X);
+                link.position.Y += (int)(link.vitesse * link.direction.Y);
 
                 // Teste les bordures d'écran
                 // A FAIRE: Trouver un façon d'avoir les dimensions de la sprite pour faire le teste des bordures
@@ -252,6 +255,8 @@ namespace Exercice01
                 }
                 previousKeys = keys;
             }
+
+
 
             link.Update(gameTime);
 
@@ -461,14 +466,14 @@ namespace Exercice01
         {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
-                if (tabEnemy[i].estVivant && link.estVivant && link.estInvincible!=true && link.position.Intersects(tabEnemy[i].position))
+                if (tabEnemy[i].estVivant && link.estVivant && link.estInvincible != true && link.position.Intersects(tabEnemy[i].position))
                 {
                     link.pointDeVie -= 1;
                     if (link.pointDeVie > 0)
                     {
                         linkTouche.Play();
                         link.estInvincible = true;
-                        link.position = new Rectangle(link.position.X - 100, link.position.Y -= 100, link.position.Width, link.position.Height);
+                        link.position = new Rectangle(link.position.X - 50, link.position.Y -= 50, link.position.Width, link.position.Height);
                     }
                     else
                     {
@@ -485,7 +490,7 @@ namespace Exercice01
                     {
                         linkTouche.Play();
                         link.position.X -= 100;
-                        link.position = new Rectangle(link.position.X - 100, link.position.Y -= 100, link.position.Width, link.position.Height);
+                        link.position = new Rectangle(link.position.X - 50, link.position.Y -= 50, link.position.Width, link.position.Height);
                     }
                     else
                     {
@@ -505,7 +510,41 @@ namespace Exercice01
                         tabEnemy[i].debutAttenteSpawnEnemy = gameTime.TotalGameTime.Seconds;
                     }
                 }
+
             }
+
+
+            for (int i = 0; i < fond.LIGNE; i++) //fond.LIGNE
+            {
+                fond.rectSource.Y = (i * 100);
+                for (int j = 0; j < fond.COLONNE; j++)
+                {
+                    fond.rectSource.X = (j * 100);
+
+
+                    if (link.estVivant && link.position.Intersects(fond.rectSource))
+                    {
+                        if (fond.map[i, j] == GameObjectTile.Sol.BuissonVert)
+                        {
+                            link.position.X -= (int)(link.vitesse * link.direction.X);
+                            link.position.Y -= (int)(link.vitesse * link.direction.Y);
+                        }
+                    }
+
+                    for(int k = 0; k < tabEnemy.GetLength(0); k++)
+                    {
+                        if (tabEnemy[k].estVivant && tabEnemy[k].position.Intersects(fond.rectSource))
+                        {
+                            if (fond.map[i, j] == GameObjectTile.Sol.BuissonVert)
+                            {
+                                tabEnemy[k].position.X -= (int)(tabEnemy[k].vitesse * tabEnemy[k].direction.X);
+                                tabEnemy[k].position.Y -= (int)(tabEnemy[k].vitesse * tabEnemy[k].direction.Y);
+                            }
+                        }
+                    }
+                }
+            }
+
 
 
         }
@@ -522,12 +561,25 @@ namespace Exercice01
 
             spriteBatch.Begin();
 
-            spriteBatch.Draw(background, fenetre, Color.White);
+            //spriteBatch.Draw(background, fenetre, Color.White);
+            for (int i = 0; i < fond.LIGNE; i++) //fond.LIGNE
+            {
+                fond.rectSource.Y = (i * 100);
+                for (int j = 0; j < fond.COLONNE; j++)
+                {
+                    fond.rectSource.X = (j * 100);
+                    spriteBatch.Draw(fond.texture, fond.rectSource, fond.tabRectSol[(int)fond.map[i, j]], Color.White);
+                }
+            }
+
+
+            spriteBatch.DrawString(font, "X: " + link.position.X + " /  Y: " + link.position.Y, new Vector2(50, 50), Color.Black);
+            spriteBatch.DrawString(font, "X: " + (link.position.X + link.position.Width) + " /  Y: " + (link.position.Y + link.position.Height), new Vector2(50, 100), Color.Black);
 
             spriteBatch.Draw(link.sprite, link.position, link.spriteAffiche, Color.White);
-            if (link.estVivant !=true)
+            if (link.estVivant != true)
             {
-                spriteBatch.DrawString(font, messageGameOver, new Vector2((fenetre.Width/2) - (font.MeasureString(messageGameOver).X / 2), fenetre.Height/2), Color.Black);
+                spriteBatch.DrawString(font, messageGameOver, new Vector2((fenetre.Width / 2) - (font.MeasureString(messageGameOver).X / 2), fenetre.Height / 2), Color.Black);
             }
 
             if (link.arme.estVivant)
@@ -568,7 +620,7 @@ namespace Exercice01
                 spriteBatch.Draw(coeurPlein, new Rectangle(positionCoeur, 100, coeurPlein.Width, coeurPlein.Height), Color.White);
                 positionCoeur += (coeurPlein.Width + 5);
             }
-            if(link.pointDeVie%2 != 0)
+            if (link.pointDeVie % 2 != 0)
             {
                 spriteBatch.Draw(coeurMoitie, new Rectangle(positionCoeur, 100, coeurPlein.Width, coeurPlein.Height), Color.White);
             }

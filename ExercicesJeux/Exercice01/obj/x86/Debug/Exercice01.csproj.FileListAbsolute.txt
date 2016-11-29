@@ -41,3 +41,4 @@ D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathi
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Inventaire.png
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Fonts\Font.xnb
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Enemy_BlueMoblin.png
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Overworld_Tiles.png

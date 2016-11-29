@@ -34,8 +34,8 @@ namespace Exercice01
         // Marche
         int marcheState = 0; //État de départ
         int nbEtatsMarche = 2; // Combien il y a de rectanbles pour l'état "Marcher"
-        public Rectangle[] tabMarcheDroite = { new Rectangle(421, 140, 71, 75), new Rectangle(421, 0, 71, 70) };
-        public Rectangle[] tabMarcheGauche = { new Rectangle(140, 0, 70, 74), new Rectangle(145, 140, 70, 70) };
+        public Rectangle[] tabMarcheDroite = { new Rectangle(421, 140, 71, 75), new Rectangle(421, 0, 71, 75) };
+        public Rectangle[] tabMarcheGauche = { new Rectangle(140, 0, 70, 75), new Rectangle(145, 140, 70, 75) };
         public Rectangle[] tabMarcheHaut = { new Rectangle(290, 0, 70, 74), new Rectangle(290, 140, 70, 75) };
         public Rectangle[] tabMarcheBas = { new Rectangle(0, 0, 70, 74), new Rectangle(0, 140, 70, 75) };
 

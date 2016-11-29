@@ -43,6 +43,7 @@
     <Compile Include="GameObjectAnime_Hero.cs" />
     <Compile Include="GameObjectAnimeEnemy.cs" />
     <Compile Include="GameObjectAnime_Missile.cs" />
+    <Compile Include="GameObjectTile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -79,6 +80,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Images\LinkSheet.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Images\Overworld_Tiles.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
