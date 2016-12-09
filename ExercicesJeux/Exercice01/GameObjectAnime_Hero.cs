@@ -15,12 +15,13 @@ namespace Exercice01
         public Texture2D sprite;
         public bool estVivant;
         public bool estInvincible;
+        public bool estRalenti;
         public Vector2 direction;
         public Rectangle spriteAffiche;
         public int pointDeVie;
         public int vieMax = 6;
         public string imgHero;
-        public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite, AttaqueGauche, AttaqueHaut, AttaqueBas, Mort };
+        public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite, AttaqueGauche, AttaqueHaut, AttaqueBas, Mort, Win };
         public Etat etat;
         private int compteur = 0;
         public int compteurInvicibilite = 0;
@@ -57,17 +58,9 @@ namespace Exercice01
         int mortState = 0;
         public Rectangle[] tabMort = { new Rectangle(1265, 702, 75, 75) };
 
-        public GameObjectAnime_Hero()
-        {
-            position = new Rectangle(100, 100, 75, 75);
-            vitesse = 2;
-            pointDeVie = 6;
-            imgHero = "Images\\LinkSheet.png";
-            direction = Vector2.Zero;
-            etat = GameObjectAnime_Hero.Etat.AttenteDroite;
-            estVivant = true;
-            estInvincible = false;
-        }
+        // Win
+        int winState = 0;
+        public Rectangle[] tabWin = { new Rectangle(1743, 87, 75, 122) };
 
         public virtual void InitializeArme()
         {
@@ -125,8 +118,14 @@ namespace Exercice01
                 spriteAffiche = tabMort[mortState];
             }
 
+            // Win
+            if (etat == Etat.Win)
+            {
+                spriteAffiche = tabWin[winState];
+            }
+
             // Attaque
-            if((etat== Etat.AttaqueDroite)|| (etat == Etat.AttaqueGauche)|| (etat == Etat.AttaqueHaut)|| (etat == Etat.AttaqueBas))
+            if ((etat== Etat.AttaqueDroite)|| (etat == Etat.AttaqueGauche)|| (etat == Etat.AttaqueHaut)|| (etat == Etat.AttaqueBas))
             {
                 //arme.estVivant = true;
                 debutCoupArme = gameTime.TotalGameTime.Seconds;

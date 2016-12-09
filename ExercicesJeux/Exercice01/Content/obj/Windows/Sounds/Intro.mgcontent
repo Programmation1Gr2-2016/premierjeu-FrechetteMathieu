@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/Sounds/Intro.mp3</SourceFile>
+  <SourceTime>2016-12-01T16:54:08.4913351-05:00</SourceTime>
+  <DestFile>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/bin/Windows/Sounds/Intro.xnb</DestFile>
+  <DestTime>2016-12-01T16:56:31.1615731-05:00</DestTime>
+  <Importer>Mp3Importer</Importer>
+  <ImporterTime>2016-03-30T02:36:08-04:00</ImporterTime>
+  <Processor>SongProcessor</Processor>
+  <ProcessorTime>2016-03-30T02:36:08-04:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput>
+    <string>D:/Google Drive/Programmation 1/Projects Visual Studio/premierjeu-FrechetteMathieu/ExercicesJeux/Exercice01/Content/bin/Windows/Sounds/Intro.wma</string>
+  </BuildOutput>
+</PipelineBuildEvent>

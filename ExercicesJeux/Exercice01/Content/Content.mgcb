@@ -55,3 +55,15 @@
 /processorParam:Quality=Best
 /build:Sounds/LOZ_Sword_Slash.wav
 
+#begin Sounds/Intro.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Sounds/Intro.mp3
+
+#begin Sounds/GameOver.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Sounds/GameOver.mp3
+

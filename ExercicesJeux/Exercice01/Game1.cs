@@ -12,11 +12,25 @@ namespace Exercice01
     /// </summary>
     public class Game1 : Game
     {
-        int fullScreen = 1;
+        int fullScreen = 0;
         int positionCoeur;
         int attenteSpawnEnemy = 3;
         int compteurEnemyTue = 0;
-        string messageGameOver = "***** Game Over *****";
+        int scoreJoueur = 0;
+        int bonusTriforce = 0;
+        double bonusTemps = 0;
+        int nbEnemyVivant;
+        double tempsJoueurEnSecondes = 0;
+        TimeSpan tempsDebutPartie;
+        TimeSpan tempsFinPartie;
+        double scoreMoyen = 0;
+        double tempsMoyen = 0;
+        int nbPartieJoue = 0;
+        int nbEchec = 0;
+        bool mustReinitialize = true;
+        bool isFinPartie = false;
+        string messageGameOver = "Game Over";
+        string messageMenuPrincipale = "ENTER - Commencer\nESC - Quitter";
         Random rnd = new Random();
 
         GraphicsDeviceManager graphics;
@@ -30,11 +44,13 @@ namespace Exercice01
         Texture2D coeurPlein;
         Texture2D coeurMoitie;
         Texture2D coeurVide;
+        Texture2D titreJeu;
 
         GameObjectAnime_Hero link;
         GameObjectAnimeEnemy[] tabEnemy = new GameObjectAnimeEnemy[10];
         GameObjectAnime_Hero.Etat etatHeroAvantAttaque = GameObjectAnime_Hero.Etat.AttenteGauche;
-        GameObjectTile fond = new GameObjectTile();
+        GameObjectTile map = new GameObjectTile();
+        GameObjectAnime_PowerUp triForce = new GameObjectAnime_PowerUp();
 
         SoundEffect sonCoupEpee;
         SoundEffectInstance coupEpee;
@@ -46,6 +62,13 @@ namespace Exercice01
         SoundEffectInstance mortEnemy;
 
         SpriteFont font;
+
+        Song songIntro;
+        Song songEnJeuExterieur;
+        Song songGameOver;
+
+        enum Ecran { EcranTitre, Jeu, EcranRejouer };
+        Ecran ecran = Ecran.EcranTitre;
 
         public Game1()
         {
@@ -91,20 +114,26 @@ namespace Exercice01
             fenetre.Width = graphics.GraphicsDevice.DisplayMode.Width;
             fenetre.Height = graphics.GraphicsDevice.DisplayMode.Height;
 
+            // Images
             background = Content.Load<Texture2D>("Images\\Background.jpg");
             inventaire = Content.Load<Texture2D>("Images\\Inventaire.png");
             coeurPlein = Content.Load<Texture2D>("Images\\CoeurPlein.png");
             coeurMoitie = Content.Load<Texture2D>("Images\\CoeurMoitie.png");
             coeurVide = Content.Load<Texture2D>("Images\\CoeurVide.png");
-            fond.texture = Content.Load<Texture2D>("Images\\Overworld_Tiles");
+            map.texture = Content.Load<Texture2D>("Images\\Overworld_Tiles");
+            titreJeu = Content.Load<Texture2D>("Images\\Titre.png");
 
-            Song song = Content.Load<Song>("Sounds\\Overworld");
+            // Musique du jeu
+            songIntro = Content.Load<Song>("Sounds\\Intro");
+            songEnJeuExterieur = Content.Load<Song>("Sounds\\Overworld");
+            songGameOver = Content.Load<Song>("Sounds\\GameOver");
             MediaPlayer.Volume = (float)0.75;
             MediaPlayer.IsRepeating = true;
-            MediaPlayer.Play(song);
 
+            // Police
             font = Content.Load<SpriteFont>("Fonts\\Font");
 
+            // Effets sonores
             sonCoupEpee = Content.Load<SoundEffect>("Sounds\\LOZ_Sword_Slash");
             coupEpee = sonCoupEpee.CreateInstance();
             sonLinkTouche = Content.Load<SoundEffect>("Sounds\\LOZ_Link_Hurt");
@@ -114,18 +143,46 @@ namespace Exercice01
             sonMortEnemy = Content.Load<SoundEffect>("Sounds\\LOZ_Enemy_Die");
             mortEnemy = sonMortEnemy.CreateInstance();
 
-            link = new GameObjectAnime_Hero();
-            link.sprite = Content.Load<Texture2D>(link.imgHero);
-            link.InitializeArme();
+            // Héro
+            Initialize_Hero();
 
+            // Enemies
+            Initialize_Enemy();
+
+        }
+
+        protected void Initialize_Hero()
+        {
+            link = new GameObjectAnime_Hero();
+            link.sprite = Content.Load<Texture2D>("Images\\LinkSheet");
+            link.InitializeArme();
+            link.vitesse = 2;
+            link.imgHero = "Images\\LinkSheet.png";
+            link.position = new Rectangle(0, 450, 75, 75);
+            link.direction = Vector2.Zero;
+            link.estVivant = true;
+            link.estInvincible = false;
+            link.estRalenti = false;
+            link.pointDeVie = link.vieMax;
+            link.etat = GameObjectAnime_Hero.Etat.AttenteDroite;
+        }
+        protected void Initialize_Enemy()
+        {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
                 tabEnemy[i] = new GameObjectAnimeEnemy((GameObjectAnimeEnemy.TypeEnemy)rnd.Next(0, 2));
                 tabEnemy[i].sprite = Content.Load<Texture2D>(tabEnemy[i].imgEnemy);
-                tabEnemy[i].position = new Rectangle(rnd.Next(400, fenetre.Right - 75), rnd.Next(400, fenetre.Bottom - 75), 75, 75);
 
 
                 //tabEnemy[i].missile = new GameObjectAnime_Missile();
+
+                //tabEnemy[i].arme.sprite = Content.Load<Texture2D>("Images\\Enemy_Missile.png");
+                //tabEnemy[i].arme.direction = Vector2.Zero;
+                //tabEnemy[i].arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
+                //tabEnemy[i].arme.estVivant = false;
+                //tabEnemy[i].arme.position = new Rectangle(fenetre.Right / 2, fenetre.Bottom / 2, 75, 75);
+
+
                 tabEnemy[i].arme.vitesse = 3;
                 tabEnemy[i].arme.sprite = Content.Load<Texture2D>(tabEnemy[i].imgMissile);
                 tabEnemy[i].arme.direction = Vector2.Zero;
@@ -134,6 +191,59 @@ namespace Exercice01
                 tabEnemy[i].arme.position = new Rectangle(fenetre.Right / 2, fenetre.Bottom / 2, 75, 75);
             }
 
+            tabEnemy[0].position = new Rectangle(1800, 700, 75, 75);
+            tabEnemy[1].position = new Rectangle(1750, 520, 75, 75);
+            tabEnemy[2].position = new Rectangle(1400, 510, 75, 75);
+            tabEnemy[3].position = new Rectangle(1350, 650, 75, 75);
+            tabEnemy[4].position = new Rectangle(1200, 800, 75, 75);
+            tabEnemy[5].position = new Rectangle(1000, 700, 75, 75);
+            tabEnemy[6].position = new Rectangle(950, 520, 75, 75);
+            tabEnemy[7].position = new Rectangle(700, 250, 75, 75);
+            tabEnemy[8].position = new Rectangle(700, 800, 75, 75);
+            tabEnemy[9].position = new Rectangle(450, 800, 75, 75);
+        }
+        protected void ReinitializeContent(GameTime gameTime)
+        {
+            switch (ecran)
+            {
+                case Ecran.EcranTitre:
+                    // Variable de pointage
+                    nbPartieJoue = 0;
+                    nbEchec = 0;
+                    scoreMoyen = 0;
+                    tempsMoyen = 0;
+                    // Musique
+                    MediaPlayer.Play(songIntro);
+                    break;
+
+                case Ecran.Jeu:
+                    // Variable de pointage
+                    nbPartieJoue++;
+                    scoreJoueur = 0;
+                    tempsJoueurEnSecondes = 0;
+                    tempsDebutPartie = gameTime.TotalGameTime;
+                    bonusTriforce = 0;
+                    bonusTemps = 0;
+                    isFinPartie = false;
+                    nbEnemyVivant = tabEnemy.GetLength(0);
+                    // Musique 
+                    MediaPlayer.Play(songEnJeuExterieur);
+                    // Héro
+                    Initialize_Hero();
+                    // Enemies
+                    Initialize_Enemy();
+                    break;
+
+                case Ecran.EcranRejouer:
+                    // Variable de pointage
+                    tempsJoueurEnSecondes = tempsFinPartie.TotalSeconds - tempsDebutPartie.TotalSeconds;
+                    MediaPlayer.Play(songGameOver);
+                    break;
+                default:
+                    break;
+            }
+
+            mustReinitialize = false;
         }
 
         /// <summary>
@@ -156,21 +266,64 @@ namespace Exercice01
                 Exit();
 
             // TODO: Add your update logic here
-            UpdateHeros(gameTime);
-            UpdateEnemy(gameTime);
-            UpdateMissile(gameTime);
-            Collision(gameTime);
+            if (mustReinitialize)
+            {
+                ReinitializeContent(gameTime);
+            }
+
+            switch (ecran)
+            {
+                case Ecran.EcranTitre:
+                    UpdateMenuTitre(gameTime);
+                    break;
+
+                case Ecran.Jeu:
+                    UpdateHeros(gameTime);
+                    UpdateEnemy(gameTime);
+                    UpdateMissile(gameTime);
+                    Collision(gameTime);
+                    TestFinPartie(gameTime);
+                    break;
+
+                case Ecran.EcranRejouer:
+                    UpdateGameOver(gameTime);
+                    break;
+            }
 
             base.Update(gameTime);
         }
 
+        protected void UpdateMenuTitre(GameTime gameTime)
+        {
+            keys = Keyboard.GetState();
+
+            if (keys.IsKeyDown(Keys.Enter))
+            {
+                //MediaPlayer.Stop();
+                mustReinitialize = true;
+                ecran = Ecran.Jeu;
+            }
+        }
+        protected void UpdateGameOver(GameTime gameTime)
+        {
+            keys = Keyboard.GetState();
+
+            if (keys.IsKeyDown(Keys.R))
+            {
+                mustReinitialize = true;
+                ecran = Ecran.Jeu;
+            }
+            else if (keys.IsKeyDown(Keys.Q))
+            {
+                mustReinitialize = true;
+                ecran = Ecran.EcranTitre;
+            }
+        }
         protected void UpdateHeros(GameTime gameTime)
         {
             if (link.etat != GameObjectAnime_Hero.Etat.Mort)
             {
                 keys = Keyboard.GetState();
-                //link.position.X += (int)(link.vitesse * link.direction.X);
-                //link.position.Y += (int)(link.vitesse * link.direction.Y);
 
                 // Touche de direction droite
                 if (keys.IsKeyDown(Keys.Right))
@@ -232,8 +385,17 @@ namespace Exercice01
                     AttaqueHero(gameTime);
                 }
 
-                link.position.X += (int)(link.vitesse * link.direction.X);
-                link.position.Y += (int)(link.vitesse * link.direction.Y);
+                if (link.estRalenti != true)
+                {
+                    link.position.X += (int)(link.vitesse * link.direction.X);
+                    link.position.Y += (int)(link.vitesse * link.direction.Y);
+                }
+                else
+                {
+                    link.position.X += (int)(link.direction.X);
+                    link.position.Y += (int)(link.direction.Y);
+                }
+
 
                 // Teste les bordures d'écran
                 // A FAIRE: Trouver un façon d'avoir les dimensions de la sprite pour faire le teste des bordures
@@ -256,12 +418,9 @@ namespace Exercice01
                 previousKeys = keys;
             }
 
-
-
             link.Update(gameTime);
 
         }
-
         protected void AttaqueHero(GameTime gameTime)
         {
             if (link.arme.estVivant)
@@ -293,35 +452,30 @@ namespace Exercice01
                 link.etat = etatHeroAvantAttaque;
             }
         }
-
         protected void UpdateEnemy(GameTime gameTime)
         {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
                 if (tabEnemy[i].estVivant == true)
                 {
-                    tabEnemy[i].position.X += (int)(tabEnemy[i].vitesse * tabEnemy[i].direction.X);
-                    tabEnemy[i].position.Y += (int)(tabEnemy[i].vitesse * tabEnemy[i].direction.Y);
-
                     // Teste les bordures d'écran
-                    // A FAIRE: Trouver un façon d'avoir les dimensions de la sprite pour faire le teste des bordures
                     if (tabEnemy[i].position.X < fenetre.Left)
                     {
                         tabEnemy[i].position.X = fenetre.Left;
                         tabEnemy[i].etat = GameObjectAnimeEnemy.Etat.MarcheDroite;
                     }
-                    else if (tabEnemy[i].position.X + 75 > fenetre.Right)
+                    else if (tabEnemy[i].position.X + tabEnemy[i].spriteAffiche.Width > fenetre.Right)
                     {
-                        tabEnemy[i].position.X = fenetre.Right - 75;
+                        tabEnemy[i].position.X = fenetre.Right - tabEnemy[i].spriteAffiche.Width;
                         tabEnemy[i].etat = GameObjectAnimeEnemy.Etat.MarcheGauche;
                     }
                     else if (tabEnemy[i].position.Y < fenetre.Top)
                     {
                         tabEnemy[i].position.Y = fenetre.Top;
                     }
-                    else if (tabEnemy[i].position.Y + 75 > fenetre.Bottom) // Le nombre est calculé selon la hauteur du sprite de marche
+                    else if (tabEnemy[i].position.Y + tabEnemy[i].spriteAffiche.Height > fenetre.Bottom)
                     {
-                        tabEnemy[i].position.Y = fenetre.Bottom - 75;
+                        tabEnemy[i].position.Y = fenetre.Bottom - tabEnemy[i].spriteAffiche.Height;
                     }
 
                     tabEnemy[i].direction.X = 0;
@@ -386,31 +540,19 @@ namespace Exercice01
                             break;
                     }
 
-
+                    tabEnemy[i].position.X += (int)(tabEnemy[i].vitesse * tabEnemy[i].direction.X);
+                    tabEnemy[i].position.Y += (int)(tabEnemy[i].vitesse * tabEnemy[i].direction.Y);
                 }
                 else
                 {
-                    // À toutes les x secondes, respawn un monstre s'il y en a moins de 4
-                    //if (gameTime.TotalGameTime.Seconds >= debutAttenteSpawnEnemy + attenteSpawnEnemy)
-                    //{
-                    //    for (int i = 0; i < tabEnemy.GetLength(0); i++)
-                    //    {
-                    //        if (tabEnemy[i].estVivant == false)
-                    //        {
-                    //            tabEnemy[i].estVivant = true;
-                    //            i = tabEnemy.GetLength(0) + 1;
-                    //        }
-                    //    }
-                    //}
                     if (gameTime.TotalGameTime.Seconds >= tabEnemy[i].debutAttenteSpawnEnemy + attenteSpawnEnemy)
                     {
-                        tabEnemy[i].estVivant = true;
+                        //tabEnemy[i].estVivant = true;
                     }
                 }
                 tabEnemy[i].Update(gameTime);
             }
         }
-
         protected void UpdateMissile(GameTime gameTime)
         {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
@@ -461,9 +603,10 @@ namespace Exercice01
             }
 
         }
-
         protected void Collision(GameTime gameTime)
         {
+            link.estRalenti = false;
+
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
                 if (tabEnemy[i].estVivant && link.estVivant && link.estInvincible != true && link.position.Intersects(tabEnemy[i].position))
@@ -473,7 +616,7 @@ namespace Exercice01
                     {
                         linkTouche.Play();
                         link.estInvincible = true;
-                        link.position = new Rectangle(link.position.X - 50, link.position.Y -= 50, link.position.Width, link.position.Height);
+                        //link.position = new Rectangle(link.position.X - 50, link.position.Y -= 50, link.position.Width, link.position.Height);
                     }
                     else
                     {
@@ -489,14 +632,12 @@ namespace Exercice01
                     if (link.pointDeVie > 0)
                     {
                         linkTouche.Play();
-                        link.position.X -= 100;
-                        link.position = new Rectangle(link.position.X - 50, link.position.Y -= 50, link.position.Width, link.position.Height);
+                        //link.position = new Rectangle(link.position.X - 50, link.position.Y -= 50, link.position.Width, link.position.Height);
                     }
                     else
                     {
                         link.estVivant = false;
                         link.etat = GameObjectAnime_Hero.Etat.Mort;
-                        sonMortLink.Play();
                     }
                 }
 
@@ -504,49 +645,105 @@ namespace Exercice01
                 {
                     if (link.arme.position.Intersects(tabEnemy[i].position))
                     {
+                        scoreJoueur += 100;
+                        nbEnemyVivant--;
                         mortEnemy.Play();
                         compteurEnemyTue++;
                         tabEnemy[i].estVivant = false;
+                        tabEnemy[i].etat = GameObjectAnimeEnemy.Etat.Mort;
                         tabEnemy[i].debutAttenteSpawnEnemy = gameTime.TotalGameTime.Seconds;
                     }
                 }
 
             }
 
-
-            for (int i = 0; i < fond.LIGNE; i++) //fond.LIGNE
+            for (int i = 0; i < GameObjectTile.LIGNE; i++)
             {
-                fond.rectSource.Y = (i * 100);
-                for (int j = 0; j < fond.COLONNE; j++)
+                map.rectSource.Y = (i * 100);
+                for (int j = 0; j < GameObjectTile.COLONNE; j++)
                 {
-                    fond.rectSource.X = (j * 100);
+                    map.rectSource.X = (j * 100);
 
-
-                    if (link.estVivant && link.position.Intersects(fond.rectSource))
+                    // Détection des collisions du héro avec le fond
+                    if (link.estVivant && link.position.Intersects(map.rectSource))
                     {
-                        if (fond.map[i, j] == GameObjectTile.Sol.BuissonVert)
+                        if (map.map1[i, j].bloqueHero)
                         {
                             link.position.X -= (int)(link.vitesse * link.direction.X);
                             link.position.Y -= (int)(link.vitesse * link.direction.Y);
                         }
+                        else if (map.map1[i, j].slowHero)
+                        {
+                            link.estRalenti = true;
+                        }
                     }
 
-                    for(int k = 0; k < tabEnemy.GetLength(0); k++)
+                    // Détection des collisions du héro avec le fond
+                    if (link.arme.estVivant && link.arme.position.Intersects(map.rectSource))
                     {
-                        if (tabEnemy[k].estVivant && tabEnemy[k].position.Intersects(fond.rectSource))
+                        if (map.map1[i, j].detruisable)
                         {
-                            if (fond.map[i, j] == GameObjectTile.Sol.BuissonVert)
+                            map.map1[i, j] = new Tuiles(Tuiles.TypeSol.Terre);
+                        }
+                    }
+
+                    // Détection des collisions de l'enemy avec le fond
+                    for (int k = 0; k < tabEnemy.GetLength(0); k++)
+                    {
+                        if (tabEnemy[k].estVivant && tabEnemy[k].position.Intersects(map.rectSource))
+                        {
+                            if (map.map1[i, j].bloqueHero)
                             {
                                 tabEnemy[k].position.X -= (int)(tabEnemy[k].vitesse * tabEnemy[k].direction.X);
                                 tabEnemy[k].position.Y -= (int)(tabEnemy[k].vitesse * tabEnemy[k].direction.Y);
                             }
                         }
+
+                        if (tabEnemy[k].arme.estVivant && tabEnemy[k].arme.position.Intersects(map.rectSource))
+                        {
+                            if (map.map1[i, j].bloqueMissile)
+                            {
+                                tabEnemy[k].arme.estVivant = false;
+                            }
+                        }
                     }
                 }
             }
+        }
+        protected void TestFinPartie(GameTime gameTime)
+        {
+            if (120 - (gameTime.TotalGameTime.TotalSeconds - tempsDebutPartie.TotalSeconds) < 0)
+            {
+                link.etat = GameObjectAnime_Hero.Etat.Mort;
+                link.Update(gameTime);
+                nbEchec++;
+                isFinPartie = true;
+            }
+            else if (link.etat == GameObjectAnime_Hero.Etat.Mort)
+            {
+                nbEchec++;
+                isFinPartie = true;
+            }
+            else if (nbEnemyVivant <= 0)
+            {
+                link.etat = GameObjectAnime_Hero.Etat.Win;
+                link.Update(gameTime);
+                link.position.Height = link.tabWin[0].Height;
+                isFinPartie = true;
+            }
 
-
-
+            if (isFinPartie)
+            {
+                bonusTriforce = 0;
+                if(link.etat == GameObjectAnime_Hero.Etat.Win)
+                {
+                    bonusTemps = 120 - (tempsFinPartie.TotalSeconds - tempsDebutPartie.TotalSeconds);
+                }
+                scoreMoyen += scoreJoueur + bonusTriforce + bonusTemps;
+                tempsFinPartie = gameTime.TotalGameTime;
+                mustReinitialize = true;
+                ecran = Ecran.EcranRejouer;
+            }
         }
 
         /// <summary>
@@ -555,38 +752,54 @@ namespace Exercice01
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.LightGreen);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
 
             spriteBatch.Begin();
 
-            //spriteBatch.Draw(background, fenetre, Color.White);
-            for (int i = 0; i < fond.LIGNE; i++) //fond.LIGNE
+            switch (ecran)
             {
-                fond.rectSource.Y = (i * 100);
-                for (int j = 0; j < fond.COLONNE; j++)
-                {
-                    fond.rectSource.X = (j * 100);
-                    spriteBatch.Draw(fond.texture, fond.rectSource, fond.tabRectSol[(int)fond.map[i, j]], Color.White);
-                }
+                case Ecran.EcranTitre:
+                    spriteBatch.Draw(titreJeu, new Rectangle((fenetre.Right / 2) - (titreJeu.Width / 2), (fenetre.Bottom / 2) - (300), titreJeu.Width, titreJeu.Height), Color.White);
+                    spriteBatch.DrawString(font, messageMenuPrincipale, new Vector2((fenetre.Width / 2) - (font.MeasureString(messageGameOver).X / 2), fenetre.Height / 2), Color.White);
+                    break;
+
+                case Ecran.Jeu:
+                    // Affichage de la map
+                    map.Draw(spriteBatch);
+                    DrawHero(gameTime);
+                    DrawEnemy(gameTime);
+                    DrawInfoJeu(gameTime);
+                    break;
+
+                case Ecran.EcranRejouer:
+                    DrawGameOver(gameTime);
+                    break;
             }
 
 
-            spriteBatch.DrawString(font, "X: " + link.position.X + " /  Y: " + link.position.Y, new Vector2(50, 50), Color.Black);
-            spriteBatch.DrawString(font, "X: " + (link.position.X + link.position.Width) + " /  Y: " + (link.position.Y + link.position.Height), new Vector2(50, 100), Color.Black);
 
+            spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        protected void DrawHero(GameTime gameTime)
+        {
             spriteBatch.Draw(link.sprite, link.position, link.spriteAffiche, Color.White);
             if (link.estVivant != true)
             {
-                spriteBatch.DrawString(font, messageGameOver, new Vector2((fenetre.Width / 2) - (font.MeasureString(messageGameOver).X / 2), fenetre.Height / 2), Color.Black);
+
             }
 
             if (link.arme.estVivant)
             {
                 spriteBatch.Draw(link.arme.sprite, link.arme.position, link.arme.spriteAffiche, Color.White);
             }
-
+        }
+        protected void DrawEnemy(GameTime gameTime)
+        {
             for (int i = 0; i < tabEnemy.GetLength(0); i++)
             {
                 if (tabEnemy[i].estVivant)
@@ -600,9 +813,15 @@ namespace Exercice01
                 }
 
             }
+        }
+        protected void DrawInfoJeu(GameTime gameTime)
+        {
+            TimeSpan chrono = gameTime.TotalGameTime;
+
 
             spriteBatch.Draw(inventaire, new Rectangle(fenetre.Right - inventaire.Width, 50, inventaire.Width, inventaire.Height), Color.White);
-            spriteBatch.DrawString(font, "Enemis tues " + compteurEnemyTue.ToString(), new Vector2(fenetre.Right - inventaire.Width + 175, 90), Color.Gainsboro);
+            spriteBatch.DrawString(font, "Chrono : " + string.Format("{0:0.00}", 120 - (gameTime.TotalGameTime.TotalSeconds - tempsDebutPartie.TotalSeconds)), new Vector2(fenetre.Right - inventaire.Width + 175, 50), Color.Gainsboro);
+            spriteBatch.DrawString(font, "Score   : " + scoreJoueur.ToString(), new Vector2(fenetre.Right - inventaire.Width + 175, 90), Color.Gainsboro);
 
             // Afficher le nombre de coeur vide correspondant a coeurMax
             positionCoeur = fenetre.Right - inventaire.Width + 30;
@@ -624,10 +843,39 @@ namespace Exercice01
             {
                 spriteBatch.Draw(coeurMoitie, new Rectangle(positionCoeur, 100, coeurPlein.Width, coeurPlein.Height), Color.White);
             }
+        }
+        protected void DrawGameOver(GameTime gameTime)
+        {
+            spriteBatch.DrawString(font, messageGameOver, new Vector2((fenetre.Width / 2) - (font.MeasureString(messageGameOver).X / 2), 100), Color.White);
+            spriteBatch.Draw(link.sprite, new Rectangle((fenetre.Width / 2) - (link.position.Width / 2), 250, link.position.Width, link.position.Height), link.spriteAffiche, Color.White);
 
-            spriteBatch.End();
+            spriteBatch.DrawString(font, "Score", new Vector2((fenetre.Width / 2) - 200, 350), Color.White);
+            spriteBatch.DrawString(font, "_______________________", new Vector2((fenetre.Width / 2) - 200, 400), Color.White);
+            spriteBatch.DrawString(font, string.Format("{0:0}", scoreJoueur + bonusTriforce + bonusTemps), new Vector2((fenetre.Width / 2) + 100, 350), Color.White);
+            spriteBatch.DrawString(font, "Enemis tues :", new Vector2((fenetre.Width / 2) - 200, 450), Color.White);
+            spriteBatch.DrawString(font, scoreJoueur.ToString(), new Vector2((fenetre.Width / 2) + 100, 450), Color.White);
+            spriteBatch.DrawString(font, "Bonus triforce :", new Vector2((fenetre.Width / 2) - 200, 500), Color.White);
+            spriteBatch.DrawString(font, bonusTriforce.ToString(), new Vector2((fenetre.Width / 2) + 100, 500), Color.White);
+            spriteBatch.DrawString(font, "Bonus temps : ", new Vector2((fenetre.Width / 2) - 200, 550), Color.White);
+            spriteBatch.DrawString(font, string.Format("{0:0}", bonusTemps), new Vector2((fenetre.Width / 2) + 100, 550), Color.White);
 
-            base.Draw(gameTime);
+
+            spriteBatch.DrawString(font, "Statistique", new Vector2((fenetre.Width / 2) - 200, 650), Color.White);
+            spriteBatch.DrawString(font, "_______________________", new Vector2((fenetre.Width / 2) - 200, 650), Color.White);
+            spriteBatch.DrawString(font, "Parties joues :", new Vector2((fenetre.Width / 2) - 200, 700), Color.White);
+            spriteBatch.DrawString(font, nbPartieJoue.ToString(), new Vector2((fenetre.Width / 2) + 100, 700), Color.White);
+            spriteBatch.DrawString(font, "% reussite :", new Vector2((fenetre.Width / 2) - 200, 750), Color.White);
+            spriteBatch.DrawString(font, Convert.ToString((nbPartieJoue - nbEchec) * 100 / nbPartieJoue), new Vector2((fenetre.Width / 2) + 100, 750), Color.White);
+            spriteBatch.DrawString(font, "Score moyen :", new Vector2((fenetre.Width / 2) - 200, 800), Color.White);
+            if(nbPartieJoue == 0)
+            {
+                spriteBatch.DrawString(font, "0", new Vector2((fenetre.Width / 2) + 100, 800), Color.White);
+            }
+            else
+            {
+                spriteBatch.DrawString(font, string.Format("{0:0}", scoreMoyen / nbPartieJoue), new Vector2((fenetre.Width / 2) + 100, 800), Color.White);
+            }
+            
         }
     }
 }

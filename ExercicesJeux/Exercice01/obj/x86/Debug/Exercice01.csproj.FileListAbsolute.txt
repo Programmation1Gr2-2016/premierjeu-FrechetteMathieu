@@ -34,7 +34,6 @@ D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathi
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Background.jpg
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Enemy_Missile.png
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Enemy_RedMoblin.png
-D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\LinkSheet.png
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\CoeurMoitie.png
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\CoeurPlein.png
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\CoeurVide.png
@@ -42,3 +41,9 @@ D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathi
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Fonts\Font.xnb
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Enemy_BlueMoblin.png
 D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Overworld_Tiles.png
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Sounds\Intro.wma
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Sounds\Intro.xnb
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\Titre.png
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Sounds\GameOver.wma
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Sounds\GameOver.xnb
+D:\Google Drive\Programmation 1\Projects Visual Studio\premierjeu-FrechetteMathieu\ExercicesJeux\Exercice01\bin\Windows\x86\Debug\Content\Images\LinkSheet.png

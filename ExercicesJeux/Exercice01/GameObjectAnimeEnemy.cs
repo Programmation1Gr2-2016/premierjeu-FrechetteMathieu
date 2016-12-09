@@ -22,15 +22,15 @@ namespace Exercice01
         public string imgMissile;
 
         public enum TypeEnemy { RedMoblin, BlueMoblin };
-        public TypeEnemy typeEnemy;
+        //public TypeEnemy typeEnemy;
 
-        public GameObjectAnime_Missile arme; // Test de lier le missile a l'enemy
+        public GameObjectAnime_Missile arme; 
 
         private int secondeDebut = 0;
         public int secondeAttente = 1;
         private Random rnd = new Random(Guid.NewGuid().GetHashCode());
 
-        public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite };
+        public enum Etat { MarcheDroite, AttenteDroite, MarcheGauche, AttenteGauche, MarcheHaut, AttenteHaut, MarcheBas, AttenteBas, AttaqueDroite, Mort };
         public Etat etat;
         private int compteur = 0;
 
@@ -49,7 +49,7 @@ namespace Exercice01
         public Rectangle[] tabAttenteHaut = { new Rectangle(687, 0, 75, 75) };
         public Rectangle[] tabAttenteBas = { new Rectangle(236, 0, 75, 75) };
 
-        public GameObjectAnimeEnemy(TypeEnemy typeEnemy)
+        public GameObjectAnimeEnemy( TypeEnemy typeEnemy)
         {
             estVivant = true;
             //tabEnemy[i].direction = Vector2.Zero;
@@ -59,34 +59,48 @@ namespace Exercice01
                 case TypeEnemy.RedMoblin:
                     //Enemy
                     imgEnemy = "Images\\Enemy_RedMoblin.png";
-
-                    // Missile
-                    arme = new GameObjectAnime_Missile();
-                    imgMissile = "Images\\Enemy_Missile.png";
                     vitesse = 2;
                     secondeAttente = rnd.Next(0, 5);
-                    etat = (Etat)rnd.Next(0,6);
+                    etat = (Etat)rnd.Next(0, 6);
+                    // Missile
+                    arme = new GameObjectAnime_Missile();
+                    //InitializeArme(2, 3);
+                    imgMissile = "Images\\Enemy_Missile.png";
+                    //InitializeArme(2, 3);
                     break;
 
                 case TypeEnemy.BlueMoblin:
                     //Enemy
                     imgEnemy = "Images\\Enemy_BlueMoblin.png";
-
-                    // Missile
-                    arme = new GameObjectAnime_Missile();
-                    imgMissile = "Images\\Enemy_Missile.png";
                     vitesse = 1;
                     secondeAttente = rnd.Next(0, 3);
                     etat = (Etat)rnd.Next(0, 6);
-
+                    // Missile
+                    arme = new GameObjectAnime_Missile();
+                    //InitializeArme(4, 1);
+                    imgMissile = "Images\\Enemy_Missile.png";
+                    //InitializeArme(4, 1);
                     break;
                 default:
                     break;
             }
         }
 
-        public virtual void InitializeArme()
+        public virtual void InitializeArme(int degat, int vitesse)
         {
+            
+            //arme.estVivant = false;
+            //arme.degatArme = degat;
+            //arme.vitesse = vitesse;
+            //arme.direction = Vector2.Zero;
+            //arme.etat = GameObjectAnime_Missile.Etat.TirGauche;
+            //arme.tabTirGauche[0] = new Rectangle(112, 417, 52, 75);
+            //arme.tabTirDroite[0] = new Rectangle(468, 417, 52, 75);
+            //arme.tabTirHaut[0] = new Rectangle(281, 393, 75, 52);
+            //arme.tabTirBas[0] = new Rectangle(0, 468, 75, 52);
+            //arme.position = new Rectangle(0, 0, 75, 75);
+            //arme.sprite = this.sprite;
+
             arme.estVivant = false;
             arme.degatArme = 1;
             arme.tabTirGauche[0] = new Rectangle(112, 417, 52, 75);
